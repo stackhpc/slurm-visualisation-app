@@ -1,0 +1,24 @@
+
+.navbar { 
+    min-width: 1360px !important;
+}
+
+.footer { 
+    min-width: 1360px !important;
+}
+
+.page-container {
+    background-color: $page-bg;
+    max-width: none !important;
+    min-width: 1360px !important;
+}
+
+.gf-form-inline {
+    margin-left: 15px;
+}
+
+.filter {
+    float: left;
+    margin-bottom: 10px;
+    margin-left: 15px;
+}

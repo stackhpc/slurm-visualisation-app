@@ -1,0 +1,55 @@
+{
+    "type": "app",
+    "name": "Slurm Visualisation",
+    "id": "stackhpc-slurm-visualisation-app",
+  
+    "info": {
+      "description": "A app plugin for grafana to visualisation slurm metrics and easily analyse metrics related to jobs",
+      "author": {
+        "name": "StackHPC",
+        "url": "https://stackhpc.com"
+      },
+      "logos": {
+        "small": "imgs/logo.svg",
+        "large": "imgs/logo.svg"
+      },
+      "links": [
+        {
+            "name": "Project site",
+            "url": "https://github.com/stackhpc/slurm-visualisation-app"
+        },
+        {
+            "name": "License & Terms",
+            "url": "https://github.com/stackhpc/slurm-visualisation-app/LICENSE"
+        }
+      ],
+      "keywords": ["openstack", "monasca", "monitoring"],
+      "version": "1.0.0",
+      "updated": "2018-07-09"
+    },
+
+    "includes": [
+      { "type": "dashboard", "name": "System Overview", "path": "dashboards/system-overview.json", "addToNav": true },
+      { "type": "dashboard", "name": "Hidden Dashboard", "path": "dashboards/hidden-dashboard.json", "addToNav": false },
+      {
+        "type": "page",
+        "name": "Slurm Overview",
+        "component": "SlurmOverviewPageCtrl",
+        "role": "Viewer",
+        "addToNav": true
+      },
+      {
+        "type": "page",
+        "name": "Cluster View",
+        "component": "ClusterViewPageCtrl",
+        "role": "Viewer",
+        "addToNav": true
+      }
+    ],
+  
+    "dependencies": {
+      "grafanaVersion": "4.x.x",
+      "plugins": [ ]
+    }
+  }
+  

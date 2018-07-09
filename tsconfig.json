@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "noImplicitAny": false,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "rootDir": "src",
+        "outDir": "dist",
+        "sourceMap": true,
+        "noUnusedLocals": false,
+        "noImplicitReturns": false,
+        "target": "es5",
+        "lib": [
+            "es2017",
+            "dom"
+        ]
+    },
+    "filesGlob": [
+        "node_modules/grafana-sdk-mocks/app/headers/common.d.ts",
+        "src/**/*.ts"
+    ],
+    "files": [
+        "node_modules/grafana-sdk-mocks/app/headers/common.d.ts",
+        "src/components/config/config.ts",
+        "src/components/monasca_client.ts",
+        "src/components/pages/cluster_view.ts",
+        "src/components/pages/slurm_overview.ts",
+        "src/globals.d.ts",
+        "src/module.ts",
+        "src/spec/moment_tests_specs.ts"
+    ]
+}
