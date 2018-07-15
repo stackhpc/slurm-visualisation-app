@@ -132,6 +132,20 @@
                     </input>
                 </div>
             </div>
+            <div class="gf-form-inline filter">
+                <div class="gf-form">
+                    <label class="gf-form-label width-8"> Owner </label>
+                </div>
+                <div class="gf-form">
+                    <input
+                        type="text"
+                        class="gf-form-input width-8",
+                        bs-typeahead="ctrl.suggestOwners",
+                        ng-model="ctrl.job_filters.owner",
+                        ng-keyup="ctrl.filterJobs()">
+                    </input>
+                </div>
+            </div>
             <div class="gf-form-inline filter" style="clear: left">
                 <div class="gf-form-select-wrapper">
                     <select

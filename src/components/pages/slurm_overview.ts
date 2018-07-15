@@ -38,6 +38,10 @@ export default class SlurmOverviewPageCtrl {
             .then(() => this.$timeout());
     }
 
+    public suggestOwners(){
+        return ["charana", "doug"];
+    }
+
     public suggestNodesByHostname(){
         return ["gluster-1.alaskalocal", "gluster-2.alaskalocal", "openhpc-compute-0"]
     }
@@ -45,7 +49,7 @@ export default class SlurmOverviewPageCtrl {
     public redirecttoJobNodeStatistics(hostname, job_and_metrics): void {
         var start_time = new Date(job_and_metrics.metrics.start_time);
         var end_time = new Date(job_and_metrics.metrics.end_time);
-        this.$location.url("/dashboard/db/system-overview").search({
+        this.$location.path("/dashboard/db/system-overview").search({
             "var-hostname": hostname,
             "from": !isNaN(start_time.getTime()) ? start_time.getTime() : undefined,
             "to": !isNaN(end_time.getTime()) ? end_time.getTime() : undefined,
@@ -68,6 +72,12 @@ export default class SlurmOverviewPageCtrl {
         if(this.job_filters.state !== undefined){
             this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
                 return job_and_metrics.metrics.state === this.job_filters.state;
+            })
+        }
+
+        if(this.job_filters.owner !== undefined){
+            this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
+                return job_and_metrics.owner === this.job_filters.owner;
             })
         }
 

@@ -1,0 +1,81 @@
+
+
+<div>
+
+        <div class="node-filters" style="overflow: auto;">
+            <div class="gf-form-inline" style="float: left; margin-bottom: 10px; margin-left: 15px;">
+                <div class="gf-form filter">
+                    <label class="gf-form-input">
+                        Job ID
+                    </label>
+                </div>
+                <div class="gf-form filter">
+                    <input
+                        type="text"
+                        bs-typeahead="ctrl.job_list"
+                        class="gf-form-input",
+                        ng-model="ctrl.node_filters.job_filters.job_id"
+                        ng-keyup="($event.which === 13) ? ctrl.drawGraphic() : null">
+                    </input>
+                </div>
+            </div>
+            <div class="gf-form-inline" style="float: left; margin-bottom: 10px; margin-left: 15px;">
+                <div class="gf-form filter">
+                    <label class="gf-form-input">
+                        Hostname
+                    </label>
+                </div>
+                <div class="gf-form filter">
+                    <input
+                        type="text"
+                        class="gf-form-input",
+                        ng-model="ctrl.node_filters.hostname"
+                        ng-keyup="ctrl.drawGraphic()">
+                    </input>
+                </div>
+            </div>
+            <div class="gf-form-inline" style="float: left; margin-bottom: 10px; margin-left: 15px;">
+                <div class="gf-form filter">
+                    <label class="gf-form-input">
+                        Owner
+                    </label>
+                </div>
+                <div class="gf-form filter">
+                    <input
+                        type="text"
+                        class="gf-form-input",
+                        ng-model="ctrl.node_filters.job_filters.owner"
+                        ng-keyup="ctrl.drawGraphic()">
+                    </input>
+                </div>
+            </div>
+        </div>
+
+        <div class="node-labels" style="clear: left; float: left; overflow: auto;">
+            <div ng-repeat="node in ctrl.filtered_nodes">
+                <div class="gf-form-inline">
+                    <div class="gf-form">
+                        <label 
+                            type="text"
+                            class="gf-form-input"
+                            style="height:{{node.height}}px">
+                        {{ node.hostname }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="float: left; position: relative;">
+            <canvas
+                style="z-index: 998; position: absolute; float:left;"
+                ng-init="ctrl.drawOnCanvas(this)"
+                id="node-job-metrics-canvas">
+            </canvas>
+            <div
+                id="job-overview-overlay"
+                style="z-index: 999; position: absolute; float:left; overflow: auto;">
+            </div>
+        </div>  
+
+    </div>

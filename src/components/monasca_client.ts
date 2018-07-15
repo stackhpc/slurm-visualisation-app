@@ -1,11 +1,18 @@
 
-import moment from 'moment'
+import moment from '../libs/moment'
 
 export default class MonascaClient {
 
     private ds: any;
 
     constructor(private backendSrv, private datasourceSrv) { }
+
+    public listMetricNamesStartWith(prefix: string){
+        return this._get("/v2.0/metrics", undefined)
+            .then(resp => resp.data.elements
+                    .map(element => element.name)
+                    .filter((name: string) => name.startsWith(prefix)))
+    }
 
     // Returns a object of unique metrics of the cluster
     public listClusterMetrics() : Promise<any> {
@@ -16,18 +23,22 @@ export default class MonascaClient {
         ]);
     }
 
-    public nodeJobMetrics(to: string, from: string){
+    public listJobs(){
+        return ["0", "1"];
+    }
+
+    public nodeJobMetrics(from: string, to: string){
         var interval = moment.duration(moment(to).diff(moment(from)));
         return Promise.resolve([
             { hostname: "gluster-1.alaskalocal", states_over_time: [
-                { state: "OFF", job_id: null, timestamp: moment(to).add(interval * (2/4)) }, // 2/4 
-                { state: "ON", job_id: "0", timestamp: moment(to).add(interval * (3/4)) }, // 1/4
-                { state: "ON", job_id: "1", timestamp: moment(to).add(interval) } // 1/4
+                { state: "OFF", jobs: null, timestamp: moment(from).add(interval * (2/4)) }, // 2/4 
+                { state: "ON", jobs: [{ owner :"doug", job_id: "0" }], timestamp: moment(from).add(interval * (3/4)) }, // 1/4
+                { state: "ON", jobs: [{ owner: "charana", job_id: "1" }], timestamp: moment(from).add(interval) } // 1/4
             ]},
             { hostname: "openhpc-compute-0", states_over_time: [
-                { state: "ON", job_id: "0", timestamp: moment(to).add(interval * (2/4)) },
-                { state: "ON", job_id: "1", timestamp: moment(to).add(interval * (3/4)) },
-                { state: "OFF", job_id: null, timestamp: moment(to).add(interval) }
+                { state: "ON", jobs: [{ owner: "charana", job_id: "1"}, { owner: "doug", job_id: "0" }], timestamp: moment(from).add(interval * (2/4)) },
+                { state: "ON", jobs: [{ owner: "charana", job_id: "1" }], timestamp: moment(from).add(interval * (3/4)) },
+                { state: "OFF", jobs: null, timestamp: moment(from).add(interval) }
             ]}
         ])
     }
@@ -49,21 +60,21 @@ export default class MonascaClient {
 
     public listJobsAndMetrics(): Promise<any> {
         return Promise.resolve([
-            { name: "Job 1", id: "uuid 1", metrics: {
+            { name: "Job 1", id: "0", owner: "charana", metrics: {
                 state: "RUNNING",
                 elapsed_time: "1-01:02:03",
                 start_time: "2018-01-01T00:00:01Z", //timestamp in OSI 8601 combined datetime format
                 end_time: "pending...",
                 resources: [{name: "nodes", value: ["gluster-1.alaskalocal", "gluster-2.alaskalocal"]}, {name: "cpus", value: 10}]
             }},
-            { name: "Job 2", id: "uuid 2", metrics: {
+            { name: "Job 2", id: "1", owner: "doug", metrics: {
                 state: "PENDING",
                 elapsed_time: "00:00:00",
                 start_time: "pending...",
                 end_time: "pending...",
                 resources: [{name: "nodes", value: ["gluster-1.alaskalocal", "openhpc-compute-0"]}, {name: "cpus", value: 20}]
             }},
-            { name: "Job 3", id: "uuid 3", metrics: {
+            { name: "Job 3", id: "2", owner: "doug", metrics: {
                 state: "FINISHED",
                 elapsed_time: "1-01:02:03",
                 start_time: "2018-01-01T00:00:01Z",

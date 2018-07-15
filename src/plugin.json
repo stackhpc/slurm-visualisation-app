@@ -31,6 +31,7 @@
     "includes": [
       { "type": "dashboard", "name": "System Overview", "path": "dashboards/system-overview.json", "addToNav": true },
       { "type": "dashboard", "name": "Hidden Dashboard", "path": "dashboards/hidden-dashboard.json", "addToNav": false },
+      { "type": "panel", "name": "Slurm View" },
       {
         "type": "page",
         "name": "Slurm Overview",
@@ -45,6 +46,7 @@
         "role": "Viewer",
         "addToNav": true
       }
+      
     ],
   
     "dependencies": {

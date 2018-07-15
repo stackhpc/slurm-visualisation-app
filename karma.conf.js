@@ -17,6 +17,7 @@ module.exports = function(config) {
     ],
 
     plugins: [
+      'karma-spec-reporter',
       'karma-chrome-launcher',
       'karma-mocha',
       'karma-expect',
@@ -27,11 +28,13 @@ module.exports = function(config) {
     files: [
       // ======= SYSTEMJS ========//
       { pattern: 'node_modules/systemjs/dist/system.src.js', watched: false, included: true}, // SystemJS module loader
+      { pattern: 'node_modules/lodash/lodash.min.js', watched: false, included: true}, // SystemJS module loader
       { pattern: 'systemjs.config.js', watched: true, included: false}, // SystemJS configuration script
       // ======= TEST RUNNER ========//
       { pattern: 'karma-test-shim.js', watched: true, included: true},
       // ======= Source Files ========//
       { pattern: 'dist/components/**/*.js', watched: true, included: false},
+      { pattern: 'dist/panels/**/*.js', watched: true, included: false},
       { pattern: 'dist/libs/**/*.js', watched: true, included: false},
       // ======= Spec Files ========//
       { pattern: 'dist/spec/**/*.js', watched: true, included: false},
@@ -55,8 +58,7 @@ module.exports = function(config) {
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
-
+    reporters: ['spec'],
 
     // web server port
     port: 9876,
@@ -82,7 +84,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous

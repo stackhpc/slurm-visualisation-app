@@ -12,6 +12,7 @@
         "target": "es5",
         "lib": [
             "es2017",
+            "es2017.object",
             "dom"
         ]
     },
@@ -23,10 +24,13 @@
         "node_modules/grafana-sdk-mocks/app/headers/common.d.ts",
         "src/components/config/config.ts",
         "src/components/monasca_client.ts",
-        "src/components/pages/cluster_view.ts",
         "src/components/pages/slurm_overview.ts",
         "src/globals.d.ts",
         "src/module.ts",
+        "src/panels/slurmView/canvas_manipulator.ts",
+        "src/panels/slurmView/module.ts",
+        "src/panels/slurmView/slurm_view.ts",
+        "src/panels/slurmView/slurm_view_helpers.ts",
         "src/spec/moment_tests_specs.ts"
     ]
 }
