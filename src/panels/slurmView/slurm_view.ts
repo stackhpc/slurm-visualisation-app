@@ -160,6 +160,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                     height: this.node_height + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
                 }
             })
+        this.filtered_nodes = this.nodes;
 
         // Draw data
         this.drawGraphic();
@@ -169,60 +170,60 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
 
     private filterNodes(){
         
-        this.filtered_nodes = this.nodes;
+        // this.filtered_nodes = this.nodes;
 
         if(this.node_filters.hostname !== undefined && this.node_filters.hostname != ""){
-            this.filtered_nodes = this.filtered_nodes
-                .filter(node => node.hostname.startsWith(this.node_filters.hostname));
+            var hostname_dimension = this.panel.targets[0].dimensions
+                .find(dimension => dimension.key === "hostname")
+            if(hostname_dimension != null) hostname_dimension.value = this.node_filters.hostname;
         }
 
-        if(this.node_filters.owner !== undefined && this.node_filters.owner != ""){
-            this.filtered_nodes = this.filtered_nodes
-                .filter(node => {
-                    var jobs_for_node = this.jobs_by_node
-                        .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-                    if(jobs_for_node === undefined) return false;
-                    return jobs_for_node.jobs
-                        .some(job => job.owner === this.node_filters.job_filters.owner)
-                });
-        }
+        // if(this.node_filters.owner !== undefined && this.node_filters.owner != ""){
+        //     this.filtered_nodes = this.filtered_nodes
+        //         .filter(node => {
+        //             var jobs_for_node = this.jobs_by_node
+        //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
+        //             if(jobs_for_node === undefined) return false;
+        //             return jobs_for_node.jobs
+        //                 .some(job => job.owner === this.node_filters.job_filters.owner)
+        //         });
+        // }
 
-        if(this.node_filters.job_filters.job_id !== undefined && this.node_filters.job_filters.job_id !== ""){
-            this.filtered_nodes = this.filtered_nodes
-                .filter(node => {
-                    var jobs_for_node = this.jobs_by_node
-                        .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-                    if(jobs_for_node === undefined) return false;
-                    return jobs_for_node.jobs
-                        .some(job =>  job.job_id === this.node_filters.job_filters.job_id)
-                });
+        // if(this.node_filters.job_filters.job_id !== undefined && this.node_filters.job_filters.job_id !== ""){
+        //     this.filtered_nodes = this.filtered_nodes
+        //         .filter(node => {
+        //             var jobs_for_node = this.jobs_by_node
+        //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
+        //             if(jobs_for_node === undefined) return false;
+        //             return jobs_for_node.jobs
+        //                 .some(job =>  job.job_id === this.node_filters.job_filters.job_id)
+        //         });
 
-            //Clamp timerange to period of time job was active
-            var [minFrom, maxTo] = [null, null]
-            this.filtered_nodes.forEach(node => {
-                var jobs_for_node = this.jobs_by_node
-                    .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-                jobs_for_node.jobs
-                    .filter(job =>  job.job_id === this.node_filters.job_filters.job_id)
-                    .forEach(job => {
-                        minFrom = Math.min(minFrom != null ? minFrom : Number.MAX_VALUE, job.start);
-                        maxTo = Math.max(maxTo != null ? maxTo : Number.MIN_VALUE, job.end);
-                    })
-            });
-            if(minFrom != null && maxTo != null){
-                this.node_filters.clamped_from = minFrom;
-                this.node_filters.clamped_to = maxTo;
-            }
+        //     //Clamp timerange to period of time job was active
+        //     var [minFrom, maxTo] = [null, null]
+        //     this.filtered_nodes.forEach(node => {
+        //         var jobs_for_node = this.jobs_by_node
+        //             .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
+        //         jobs_for_node.jobs
+        //             .filter(job =>  job.job_id === this.node_filters.job_filters.job_id)
+        //             .forEach(job => {
+        //                 minFrom = Math.min(minFrom != null ? minFrom : Number.MAX_VALUE, job.start);
+        //                 maxTo = Math.max(maxTo != null ? maxTo : Number.MIN_VALUE, job.end);
+        //             })
+        //     });
+        //     if(minFrom != null && maxTo != null){
+        //         this.node_filters.clamped_from = minFrom;
+        //         this.node_filters.clamped_to = maxTo;
+        //     }
 
-        } else {
-            delete this.node_filters.clamped_from;
-            delete this.node_filters.clamped_to;
-        }
+        // } else {
+        //     delete this.node_filters.clamped_from;
+        //     delete this.node_filters.clamped_to;
+        // }
     }
 
     private drawGraphic(){
         
-        this.filterNodes();
         var [from, to] = [this.node_filters.clamped_from || this.node_filters.from, this.node_filters.clamped_to || this.node_filters.to]
         this.canvas_manipulator.clearJobs();
         for(let j = 0; j < this.filtered_nodes.length; j++){
