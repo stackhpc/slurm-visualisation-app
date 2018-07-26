@@ -175,6 +175,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         if(this.node_filters.hostname !== undefined && this.node_filters.hostname != ""){
             var hostname_dimension = this.panel.targets[0].dimensions
                 .find(dimension => dimension.key === "hostname")
+            console.log(hostname_dimension);
             if(hostname_dimension != null) hostname_dimension.value = this.node_filters.hostname;
         }
 
