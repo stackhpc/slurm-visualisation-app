@@ -3,6 +3,7 @@
 import {MetricsPanelCtrl} from 'app/plugins/sdk';
 import _ from 'lodash';
 import moment from '../../libs/moment'
+// @ts-ignore
 import CanvasManipulator from './canvas_manipulator';
 import { parseTimeSeries, inverseLinearInterpolateOSIString, linearInterpolateOSIString,
      getTimeRange, orderByLevel } from './slurm_view_helpers';
@@ -11,7 +12,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     public static templateUrl = "panels/slurmView/slurm_view.html"
     private node_height = 40 
     private node_level_offset = 10;
-    private total_width = 500;
+    private total_width = this.panel.span * 80;
     private node_filters: any;
     private nodes: Array<any>;
     private filtered_nodes: Array<any>;
@@ -19,10 +20,11 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private jobs_by_level_by_node: Array<any>;
     private canvas_manipulator: CanvasManipulator;
 
-    constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location){
+   constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location, public timeSrv){
         super($scope, $injector);
-        
-        // this.events.on('data-received', this.onDataReceived.bind(this));
+
+        this.events.on('data-received', this.onDataReceived.bind(this));
+        this.events.on('render', this.onDataReceived.bind(this));
         this.node_filters = {
             job_filters: {}
         };
@@ -159,7 +161,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                     hostname: jobs_by_level_for_node.hostname,
                     height: this.node_height + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
                 }
-            })
+		})
         this.filtered_nodes = this.nodes;
 
         // Draw data
@@ -168,64 +170,72 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         
     }
 
-    private filterNodes(){
-        
-        // this.filtered_nodes = this.nodes;
+    public filterNodes(){
 
-        if(this.node_filters.hostname !== undefined && this.node_filters.hostname != ""){
-            var hostname_dimension = this.panel.targets[0].dimensions
-                .find(dimension => dimension.key === "hostname")
-            console.log(hostname_dimension);
-            if(hostname_dimension != null) hostname_dimension.value = this.node_filters.hostname;
+        
+        var hostname_dimension = this.panel.targets[0].dimensions
+            .find(dimension => dimension.key === "hostname")
+        if(hostname_dimension != null) {
+            if(this.node_filters.hostname != null && this.node_filters.hostname !== ""){
+                hostname_dimension.value = this.node_filters.hostname;
+            } else hostname_dimension.value = "$all";
         }
 
-        // if(this.node_filters.owner !== undefined && this.node_filters.owner != ""){
-        //     this.filtered_nodes = this.filtered_nodes
-        //         .filter(node => {
-        //             var jobs_for_node = this.jobs_by_node
-        //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-        //             if(jobs_for_node === undefined) return false;
-        //             return jobs_for_node.jobs
-        //                 .some(job => job.owner === this.node_filters.job_filters.owner)
-        //         });
-        // }
+        var user_id_dimension = this.panel.targets[0].dimensions
+            .find(dimension => dimension.key === "user_id")
+        if(user_id_dimension != null) {
+            if(this.node_filters.job_filters.owner != null && this.node_filters.job_filters.owner !== ""){
+                user_id_dimension.value = this.node_filters.job_filters.owner;
+            } else user_id_dimension.value = "$all";
+        }
 
-        // if(this.node_filters.job_filters.job_id !== undefined && this.node_filters.job_filters.job_id !== ""){
-        //     this.filtered_nodes = this.filtered_nodes
-        //         .filter(node => {
-        //             var jobs_for_node = this.jobs_by_node
-        //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-        //             if(jobs_for_node === undefined) return false;
-        //             return jobs_for_node.jobs
-        //                 .some(job =>  job.job_id === this.node_filters.job_filters.job_id)
-        //         });
 
-        //     //Clamp timerange to period of time job was active
-        //     var [minFrom, maxTo] = [null, null]
-        //     this.filtered_nodes.forEach(node => {
-        //         var jobs_for_node = this.jobs_by_node
-        //             .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-        //         jobs_for_node.jobs
-        //             .filter(job =>  job.job_id === this.node_filters.job_filters.job_id)
-        //             .forEach(job => {
-        //                 minFrom = Math.min(minFrom != null ? minFrom : Number.MAX_VALUE, job.start);
-        //                 maxTo = Math.max(maxTo != null ? maxTo : Number.MIN_VALUE, job.end);
-        //             })
-        //     });
-        //     if(minFrom != null && maxTo != null){
-        //         this.node_filters.clamped_from = minFrom;
-        //         this.node_filters.clamped_to = maxTo;
-        //     }
+        var job_id_dimension = this.panel.targets[0].dimensions
+            .find(dimension => dimension.key === "job_id")
+        if(job_id_dimension != null) {
+            if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== ""){
+                [this.node_filters.stored_from, this.node_filters.stored_to] = [this.node_filters.from, this.node_filters.to]
+                job_id_dimension.value = this.node_filters.job_filters.job_id;
+            } else {
+                job_id_dimension.value = "$all";
+            }
+        }
 
-        // } else {
-        //     delete this.node_filters.clamped_from;
-        //     delete this.node_filters.clamped_to;
-        // }
+        this.refresh();
     }
+
+    // private clampTimeRange(){
+
+    //     if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== ""){
+    //         //Clamp timerange to period of time job was active
+    //         var [minFrom, maxTo] = [null, null]
+    //         this.filtered_nodes.forEach(node => {
+    //             var jobs_for_node = this.jobs_by_node
+    //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
+    //             jobs_for_node.jobs
+    //                 .filter(job =>  job.job_id === this.node_filters.job_filters.job_id)
+    //                 .forEach(job => {
+    //                     minFrom = Math.min(minFrom != null ? minFrom : Number.MAX_VALUE, job.start);
+    //                     maxTo = Math.max(maxTo != null ? maxTo : Number.MIN_VALUE, job.end);
+    //                 })
+    //         });
+    //         if(minFrom != null && maxTo != null){
+                
+    //             this.timeSrv.setTime({
+    //                 from: minFrom,
+    //                 to: maxTo
+    //             })
+    //         }
+    //     }
+    //     else {
+
+    //     }
+    // }
 
     private drawGraphic(){
         
-        var [from, to] = [this.node_filters.clamped_from || this.node_filters.from, this.node_filters.clamped_to || this.node_filters.to]
+        //this.clampTimeRange();
+        var [from, to] = [this.node_filters.from, this.node_filters.to]
         this.canvas_manipulator.clearJobs();
         for(let j = 0; j < this.filtered_nodes.length; j++){
             var node = this.filtered_nodes[j];
@@ -249,16 +259,13 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                             startProp = startProp == null ? 0 : startProp;
                             endProp = endProp == null ? 1 : endProp;
                         } else return;
+                    // if((endProp - startProp) * this.total_width < 30) return;
                     this.canvas_manipulator.addJob(j, level, job, startProp, endProp - startProp);
-                    // if((this.node_filters.job_filters.job_id === undefined 
-                    //     || this.node_filters.job_filters.job_id === "")
-                    //     && ((endProp - startProp) * this.total_width) < 30) return;
-                    
                 })
             })
         }
         this.canvas_manipulator.resetCanvas();
-        this.canvas_manipulator.drawTimeline(moment(from), moment(to));
+        this.canvas_manipulator.drawTimeline(from, to);
         this.canvas_manipulator.drawJobs(undefined);
     }
 
@@ -270,21 +277,24 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         console.log("x: " + canvas_elem.parentElement.style.width);
         this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height, this.node_level_offset, this.total_width, this.$location, this.monascaSrv);
         canvas_elem.addEventListener("mousedown", (event) => {
-            var [from, to] = [this.node_filters.clamped_from || this.node_filters.from, this.node_filters.clamped_to || this.node_filters.to]
-            this.node_filters.newFrom = linearInterpolateOSIString(from, to, event.offsetX / (canvas_elem.width/2))
+            if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== "") return;
+            this.node_filters.newFrom = linearInterpolateOSIString(this.node_filters.from, this.node_filters.to, event.offsetX / (canvas_elem.width/2))
             console.log("this.node_filters.newFrom: " + this.node_filters.newFrom);
         });
         canvas_elem.addEventListener("mouseup", (event) => {
-            var [from, to] = [this.node_filters.clamped_from || this.node_filters.from, this.node_filters.clamped_to || this.node_filters.to]
-            this.node_filters.newTo = linearInterpolateOSIString(from, to, event.offsetX / (canvas_elem.width/2))
+            this.node_filters.newTo = linearInterpolateOSIString(this.node_filters.from, this.node_filters.to, event.offsetX / (canvas_elem.width/2))
             console.log("this.node_filters.newTo: " + this.node_filters.newTo);
             if(!moment(this.node_filters.newTo).isSame(moment(this.node_filters.newFrom), "minute")){
-                this.node_filters.clamped_to = this.node_filters.to = moment(this.node_filters.newTo).isAfter(moment(this.node_filters.newFrom)) ? this.node_filters.newTo : this.node_filters.newFrom;
-                this.node_filters.clamped_from = this.node_filters.from = moment(this.node_filters.newFrom).isBefore(moment(this.node_filters.newTo)) ? this.node_filters.newFrom : this.node_filters.newTo;
-            }
-            this.drawGraphic();
+                var to = moment(this.node_filters.newTo).isAfter(moment(this.node_filters.newFrom)) ? this.node_filters.newTo : this.node_filters.newFrom;
+                var from = moment(this.node_filters.newFrom).isBefore(moment(this.node_filters.newTo)) ? this.node_filters.newFrom : this.node_filters.newTo;
+                //this.eventManager.updateTime({to: to, from: from});
+                this.timeSrv.setTime({
+                    from: from,
+                    to: to
+                })
+            }        
         });
-        this.initPanelData();
+        // this.initPanelData();
     }
     
 }

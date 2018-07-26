@@ -15,7 +15,7 @@
                         bs-typeahead="ctrl.job_list"
                         class="gf-form-input",
                         ng-model="ctrl.node_filters.job_filters.job_id"
-                        ng-keyup="($event.which === 13) ? ctrl.drawGraphic() : null">
+                        ng-keyup="($event.which === 13) ? ctrl.filterNodes() : null">
                     </input>
                 </div>
             </div>
@@ -30,7 +30,7 @@
                         type="text"
                         class="gf-form-input",
                         ng-model="ctrl.node_filters.hostname"
-                        ng-keyup="ctrl.filterNodes()">
+                        ng-keyup="($event.which === 13) ? ctrl.filterNodes() : null">
                     </input>
                 </div>
             </div>
@@ -45,7 +45,7 @@
                         type="text"
                         class="gf-form-input",
                         ng-model="ctrl.node_filters.job_filters.owner"
-                        ng-keyup="ctrl.drawGraphic()">
+                        ng-keyup="($event.which === 13) ? ctrl.filterNodes() : null">
                     </input>
                 </div>
             </div>

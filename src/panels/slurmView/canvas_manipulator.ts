@@ -8,7 +8,7 @@ bluebird.config({cancellation: true});
 
 export default class CanvasManipulator {
     
-    private drawingContext: any;
+    private drawingContext: CanvasRenderingContext2D;
     private time_range_resolution = 8; // ie.number of intervals
     private timeline_height = 30 * window.devicePixelRatio;
     private job_owner_hue_map: Map<string, number> = new Map();
@@ -18,6 +18,7 @@ export default class CanvasManipulator {
     private mouse_move = false;
     private mouse_down_offset_x;
     private display_job_overview_overlay: bluebird<any>;
+    private canvas_image: ImageData;
 
     constructor(private canvas: HTMLCanvasElement, private job_overview_overlay: HTMLDivElement,
         private node_height, private level_offset, private total_width, private $location, 
@@ -61,30 +62,60 @@ export default class CanvasManipulator {
         }
     }
 
+    private mouse_down_start_offsetX;
+    private mouse_down_delta_offset_x;
+
     private addEventListeners(){
 
+        // this.canvas.addEventListener("mouseout", (event) => {
+        //     this.job_overview_overlay.style.display = "none";
+        // })
+
         this.canvas.addEventListener("mousedown", (event) => {
+            this.canvas_image = this.drawingContext.getImageData(0, 0, this.total_width, this.getHeight());
             this.mouse_down = true;
+            this.mouse_down_start_offsetX = event.offsetX * window.devicePixelRatio;
+            this.mouse_down_delta_offset_x = 0;
             this.mouse_down_offset_x = event.offsetX * window.devicePixelRatio;
-            this.drawLine(
-                [this.mouse_down_offset_x, 0],
-                [this.mouse_down_offset_x, this.getHeight()],
-                "red"
-            );
         });
 
         this.canvas.addEventListener("mousemove", (event) => {
             var offsetX = event.offsetX * window.devicePixelRatio;
             var offsetY = event.offsetY * window.devicePixelRatio;
             if(this.mouse_down == true){
-                this.mouse_move = true;
-                this.drawingContext.globalAlpha = 0.3;
-                this.drawingContext.fillStyle = "#555555"
-                this.drawingContext.fillRect(
-                    this.mouse_down_offset_x , 0,
-                    offsetX - this.mouse_down_offset_x, this.getHeight());
+                if(!this.mouse_move){
+                    this.drawLine(
+                        [this.mouse_down_start_offsetX, 0],
+                        [this.mouse_down_start_offsetX, this.getHeight()],
+                        "red"
+                    );
+                    this.mouse_move = true;
+                }
+                if(Math.abs(offsetX - this.mouse_down_start_offsetX) < this.mouse_down_delta_offset_x){
+                    //refresh and draw overlay till current point
+                    this.drawingContext.putImageData(this.canvas_image, 0, 0);
+                    this.drawLine(
+                        [this.mouse_down_start_offsetX, 0],
+                        [this.mouse_down_start_offsetX, this.getHeight()],
+                        "red"
+                    );
+                    this.drawingContext.globalAlpha = 0.3;
+                    this.drawingContext.fillStyle = "#555555"
+                    this.drawingContext.fillRect(
+                        this.mouse_down_start_offsetX , 0,
+                        offsetX - this.mouse_down_start_offsetX, this.getHeight());
+                    this.drawingContext.globalAlpha = 1;                    
+                }
+                else{ //continue drawing overlay
+                    this.drawingContext.globalAlpha = 0.3;
+                    this.drawingContext.fillStyle = "#555555"
+                    this.drawingContext.fillRect(
+                        this.mouse_down_offset_x , 0,
+                        offsetX - this.mouse_down_offset_x, this.getHeight());
+                    this.drawingContext.globalAlpha = 1;
+                }
+                this.mouse_down_delta_offset_x = Math.abs(offsetX - this.mouse_down_start_offsetX);
                 this.mouse_down_offset_x = offsetX;
-                this.drawingContext.globalAlpha = 1;
             }
             else{
                 var [node_i, selected_job] = this.findNode(offsetX, offsetY);
@@ -163,11 +194,13 @@ export default class CanvasManipulator {
     }
 
     // @ts-ignore
-    public drawTimeline(from: moment.Moment, to: moment.Moment){
+    public drawTimeline(from, to){
+        console.log("from: " + moment(from).toDate().toUTCString().split(" ")[4]);
+        console.log("to: " + moment(to).toDate().toUTCString().split(" ")[4]);
 
         if(this.jobs_data.length > 0){
             
-            var interval_ms = moment.duration(to.diff(from)) / this.time_range_resolution;
+            var interval_ms = moment.duration(moment(to).diff(moment(from))) / this.time_range_resolution;
             var interval_x = this.total_width / this.time_range_resolution;
             var height = this.getHeight();
     
@@ -182,7 +215,7 @@ export default class CanvasManipulator {
             Array.from(Array(this.time_range_resolution).keys()).forEach(i => {
                 if(i == 0 || i == this.time_range_resolution) return;
                 var x = interval_x * i;
-                var time_string_24hr = from.add(interval_ms * i).toDate().toTimeString().split(" ")[0];
+                var time_string_24hr = moment(from).add(interval_ms * i).toDate().toUTCString().split(" ")[4];
                 this.drawingContext.font = "22px AvenirNext-UltraLight";
                 var textMeasure = this.drawingContext.measureText(time_string_24hr);
                 this.drawingContext.fillText(time_string_24hr, x - textMeasure.width/2, height + this.timeline_height * (3/4));
