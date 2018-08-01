@@ -12,7 +12,6 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     public static templateUrl = "panels/slurmView/slurm_view.html"
     private node_height = 40 
     private node_level_offset = 10;
-    private total_width = this.panel.span * 80;
     private node_filters: any;
     private nodes: Array<any>;
     private filtered_nodes: Array<any>;
@@ -135,38 +134,44 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private onDataReceived(dataSeries){
         console.log("data recieved: " + JSON.stringify(dataSeries));
 
-        // Check data
-        try {
-            if(dataSeries[0]){
-                if(dataSeries[0].target.split(" ").length !== 3) throw Error("incorret dataSeries format");
-            } else throw Error("empty dataSeries");
-        } catch(err){
-            this.alertSrv.set(err.message, null, "error", 10000);
+        if(dataSeries === undefined){
+            this.drawGraphic();
             return;
         }
 
-        
-        // Store data
-        [this.node_filters.from, this.node_filters.to] = getTimeRange(dataSeries);
-        this.jobs_by_node = parseTimeSeries(dataSeries);
-        //TODO: Why is this.jobs_by_node object manipulated
-        this.jobs_by_level_by_node = orderByLevel(_.cloneDeep(this.jobs_by_node));
+        else {
+            // Check data
+            try {
+                if(dataSeries[0]){
+                    if(dataSeries[0].target.split(" ").length !== 3) throw Error("incorret dataSeries format");
+                } else throw Error("empty dataSeries");
+            } catch(err){
+                this.alertSrv.set(err.message, null, "error", 10000);
+                return;
+            }
 
-        this.nodes = this.jobs_by_level_by_node
-            .filter(jobs_by_level_for_node => { //Filter nodes with no jobs
-                return (jobs_by_level_for_node.jobs_by_level.length > 0)
+            
+            // Store data
+            [this.node_filters.from, this.node_filters.to] = getTimeRange(dataSeries);
+            this.jobs_by_node = parseTimeSeries(dataSeries);
+            //TODO: Why is this.jobs_by_node object manipulated
+            this.jobs_by_level_by_node = orderByLevel(_.cloneDeep(this.jobs_by_node));
+
+            this.nodes = this.jobs_by_level_by_node
+                .filter(jobs_by_level_for_node => { //Filter nodes with no jobs
+                    return (jobs_by_level_for_node.jobs_by_level.length > 0)
+                })
+                .map(jobs_by_level_for_node => {
+                    return {
+                        hostname: jobs_by_level_for_node.hostname,
+                        height: this.node_height + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
+                    }
             })
-            .map(jobs_by_level_for_node => {
-                return {
-                    hostname: jobs_by_level_for_node.hostname,
-                    height: this.node_height + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
-                }
-		})
-        this.filtered_nodes = this.nodes;
+            this.filtered_nodes = this.nodes;
 
-        // Draw data
-        this.drawGraphic();
-        
+            // Draw data
+            this.drawGraphic();
+        }
         
     }
 
@@ -264,7 +269,8 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                 })
             })
         }
-        this.canvas_manipulator.resetCanvas();
+        console.log("this.panel.span: " + this.panel.span);
+        this.canvas_manipulator.resetCanvas(this.panel.span * 110 - 155);
         this.canvas_manipulator.drawTimeline(from, to);
         this.canvas_manipulator.drawJobs(undefined);
     }
@@ -275,7 +281,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         var canvas_elem = elem.find("#node-job-metrics-canvas")[0];
         var job_overview_overlay_elem = elem.find("#job-overview-overlay")[0];
         console.log("x: " + canvas_elem.parentElement.style.width);
-        this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height, this.node_level_offset, this.total_width, this.$location, this.monascaSrv);
+        this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height, this.node_level_offset, this.panel.span * 110 - 155, this.$location, this.monascaSrv);
         canvas_elem.addEventListener("mousedown", (event) => {
             if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== "") return;
             this.node_filters.newFrom = linearInterpolateOSIString(this.node_filters.from, this.node_filters.to, event.offsetX / (canvas_elem.width/2))

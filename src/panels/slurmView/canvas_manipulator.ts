@@ -43,6 +43,14 @@ export default class CanvasManipulator {
             : 0;
     }
 
+    private getJobWidth(job){
+        return job.width_normalized * this.total_width;
+    }
+
+    private getJobX(job){
+        return job.start_normalized * this.total_width + this.level_offset * job.level;
+    }
+
     private findNode(offsetX, offsetY){
         for(let node_i = 0; node_i < this.jobs_data.length; node_i++){
             var node_y = this.jobs_data[node_i].y;
@@ -52,7 +60,7 @@ export default class CanvasManipulator {
                 var bounding_jobs = jobs_for_node.filter(job => {
                     var job_y = this.jobs_data[node_i].y + this.level_offset * this.jobs_data[node_i].levels - this.level_offset * job.level;
                     var job_height = this.node_height;
-                    if(offsetX > job.x  && offsetX < job.x + job.width 
+                    if(offsetX > this.getJobX(job)  && offsetX < this.getJobX(job) + this.getJobWidth(job)
                         && offsetY > job_y  && offsetY < job_y + job_height) return true;
                     else return false;
                 })
@@ -67,9 +75,10 @@ export default class CanvasManipulator {
 
     private addEventListeners(){
 
-        // this.canvas.addEventListener("mouseout", (event) => {
-        //     this.job_overview_overlay.style.display = "none";
-        // })
+        angular.element(this.job_overview_overlay).parent()[0].addEventListener("mouseleave", (event) => {
+            console.log("mouseleave");
+            this.job_overview_overlay.style.display = "none";
+        })
 
         this.canvas.addEventListener("mousedown", (event) => {
             this.canvas_image = this.drawingContext.getImageData(0, 0, this.total_width, this.getHeight());
@@ -123,7 +132,7 @@ export default class CanvasManipulator {
                     this.drawJobs(node_i);
                     var job_y = this.jobs_data[node_i].y + this.level_offset * this.jobs_data[node_i].levels - this.level_offset * selected_job.level;
                     var job_height = this.node_height;
-                    this.drawJob(selected_job.x, job_y, selected_job.width, job_height, selected_job.job_id, selected_job.color);
+                    this.drawJob(this.getJobX(selected_job), job_y, this.getJobWidth(selected_job), job_height, selected_job.job_id, selected_job.color);
                 }
             }
         });
@@ -134,6 +143,7 @@ export default class CanvasManipulator {
                 var [node_i, selected_job] = this.findNode(offsetX, offsetY);
                 if(selected_job != null){
 
+                    this.job_overview_overlay.style.display = "block";
                     this.job_overview_overlay.style.top = event.offsetY + "px";
                     this.job_overview_overlay.style.left = event.offsetX + "px";
                     this.job_overview_overlay.style.backgroundColor = "transparent";
@@ -183,12 +193,13 @@ export default class CanvasManipulator {
 
     
 
-    public resetCanvas(){
+    public resetCanvas(total_width){
         
+        this.total_width = total_width * window.devicePixelRatio;
+        this.canvas.style.width = (this.total_width/window.devicePixelRatio) + "px";
+        this.canvas.width = this.total_width;
         this.canvas.style.height = (this.getHeight() + this.timeline_height)/window.devicePixelRatio + "px";
-        console.log("this.canvas.style.height: " + this.canvas.style.height);
         this.canvas.height = (this.getHeight() + this.timeline_height);
-        console.log("this.canvas.height: " + this.canvas.height);
         this.drawingContext.fillStyle = "#1f1d1d";
         this.drawingContext.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
@@ -244,7 +255,7 @@ export default class CanvasManipulator {
                 jobs_for_node_for_level.forEach(job => {
                     var job_y = jobs_for_node_by_level.y + this.level_offset * jobs_for_node_by_level.levels - this.level_offset * job.level;
                     var job_height = this.node_height;
-                    this.drawJob(job.x, job_y, job.width, job_height, job.job_id, job.color);
+                    this.drawJob(this.getJobX(job), job_y, this.getJobWidth(job), job_height, job.job_id, job.color);
                 });
             });
         })
@@ -280,7 +291,7 @@ export default class CanvasManipulator {
     public addJob(node_i, level, job, start_normalized, width_normalized): void {
 
         var x = start_normalized * this.total_width + this.level_offset * level;
-        var width = width_normalized * this.total_width;
+        var width = width_normalized;
         if(!this.job_id_saturation_value_map.has(job.job_id)) {
             if(!this.job_owner_hue_map.has(job.owner)){
                 this.job_owner_hue_map.set(job.owner, Math.random());
@@ -299,7 +310,7 @@ export default class CanvasManipulator {
         console.log("rgb: " + JSON.stringify(rgb));
 
         this.jobs_data[node_i].jobs_level_data[level].push({
-            x: x, width: width, level: level,
+            start_normalized: start_normalized, width_normalized: width_normalized, level: level,
             job_id: job.job_id, hostname: job.hostname, owner: job.owner,
             color: "#" + Number(rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).padStart(6, '0')
         });
