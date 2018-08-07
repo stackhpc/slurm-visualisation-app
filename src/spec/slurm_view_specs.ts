@@ -45,33 +45,42 @@ describe("onDataReceived", () => {
     var interval = moment.duration(moment(to).diff(moment(from)));
     var times = Array.from(Array(5).keys()).map(i => moment(from).add(interval * (i/4)).toDate().getTime());
 
+    var _JOB_STATE = {
+        "UNKNOWN": 0,  
+        "PENDING": 1,       // PD, Awaiting resource allocation
+        "RUNNING": 2,       // R, Resources allocated and script executing
+        "SUSPENDED": 3,     // S, Job suspended and previously allocated resources released
+        "COMPLETING": 4,    // CG, in the process of completing, processes of a job still executing in the background
+        "COMPLETED": 5      // CD, job terminated (successfully)
+    }
+
     var dataSeries = [
         {
           target: "gluster-1.alaskalocal 0 doug",
           datapoints: [
-            [2, times[2]], 
-            [2, times[3]],
+            [_JOB_STATE["RUNNING"], times[2]], 
+            [_JOB_STATE["RUNNING"], times[3]],
           ]
         },
         {
           target: "gluster-1.alaskalocal 1 charana",
           datapoints: [
-            [2, times[3]],
-            [2, times[4]]
+            [_JOB_STATE["RUNNING"], times[3]],
+            [_JOB_STATE["RUNNING"], times[4]]
           ]
         },
         {
             target: "openhpc-compute-0 0 doug",
             datapoints: [
-              [2, times[2]],
-              [2, times[3]]
+              [_JOB_STATE["RUNNING"], times[2]],
+              [_JOB_STATE["RUNNING"], times[3]]
             ]
         },
         {
           target: "openhpc-compute-0 1 charana",
           datapoints: [
-            [2, times[2]],
-            [2, times[4]]
+            [_JOB_STATE["RUNNING"], times[2]],
+            [_JOB_STATE["RUNNING"], times[4]]
           ]
         }
     ]

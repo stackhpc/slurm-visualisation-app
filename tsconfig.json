@@ -27,10 +27,14 @@
         "src/components/pages/slurm_overview.ts",
         "src/globals.d.ts",
         "src/module.ts",
+        "src/panels/jobView/job_view.ts",
+        "src/panels/jobView/job_view_helpers.ts",
+        "src/panels/jobView/module.ts",
         "src/panels/slurmView/canvas_manipulator.ts",
         "src/panels/slurmView/module.ts",
         "src/panels/slurmView/slurm_view.ts",
         "src/panels/slurmView/slurm_view_helpers.ts",
-        "src/spec/moment_tests_specs.ts"
+        "src/spec/job_view_specs.ts",
+        "src/spec/slurm_view_specs.ts"
     ]
 }

@@ -136,9 +136,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
 
         if(dataSeries === undefined){
             this.drawGraphic();
-            return;
         }
-
         else {
             // Check data
             try {

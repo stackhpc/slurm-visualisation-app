@@ -1,5 +1,6 @@
 
 import moment from '../libs/moment'
+import _ from 'lodash'
 
 export default class MonascaClient {
 
@@ -58,31 +59,41 @@ export default class MonascaClient {
         ]);
     }
 
-    public listJobsAndMetrics(): Promise<any> {
-        return Promise.resolve([
-            { name: "Job 1", id: "0", owner: "charana", metrics: {
-                state: "RUNNING",
-                elapsed_time: "1-01:02:03",
-                start_time: "2018-01-01T00:00:01Z", //timestamp in OSI 8601 combined datetime format
-                end_time: "pending...",
-                resources: [{name: "nodes", value: ["gluster-1.alaskalocal", "gluster-2.alaskalocal"]}, {name: "cpus", value: 10}]
-            }},
-            { name: "Job 2", id: "1", owner: "doug", metrics: {
-                state: "PENDING",
-                elapsed_time: "00:00:00",
-                start_time: "pending...",
-                end_time: "pending...",
-                resources: [{name: "nodes", value: ["gluster-1.alaskalocal", "openhpc-compute-0"]}, {name: "cpus", value: 20}]
-            }},
-            { name: "Job 3", id: "2", owner: "doug", metrics: {
-                state: "FINISHED",
-                elapsed_time: "1-01:02:03",
-                start_time: "2018-01-01T00:00:01Z",
-                end_time: "2018-01-02T00:00:01Z",
-                resources: [{name: "nodes", value: ["gluster-2.alaskalocal", "openhpc-compute-0"]}, {name: "cpus", value: 30}]
-            }}
-        ])
-    }
+    // public listJobsAndMetrics(): Promise<any> {
+
+    //     // return this._get("/v2.0/metrics/measurements", { 
+    //     //         name: "process.cpu_perc", 
+    //     //         merge_metrics: false,
+    //     //         // start_time: moment().subtract(1, "day").toISOString(),
+    //     //         // end_time: moment().toISOString(),
+    //     //         start_time: "2018-07-23T10:00:00Z",
+    //     //         group_by: "hostname",
+    //     //         alias: "@hostname"
+    //     //     })
+    //     //     .then(resp => {
+    //     //         console.log("resp.data: " + JSON.stringify(resp.data));
+    //     //         var unique_jobs = _.groupBy(resp.data.elements, metric_measurement => metric_measurement.dimensions.job_id)
+
+    //     //         var jobs_and_job_metrics = [];
+    //     //         Object.entries(unique_jobs).forEach(([job_id, metric_measurements]: [string, Array<any>]) => {
+    //     //             if(metric_measurements.length > 0 != null  && metric_measurements[0].measurements.length > 0) {
+    //     //                 var hosts = metric_measurements.map(metric_measurement =>  metric_measurement.dimensions.hostname)
+    //     //                 jobs_and_job_metrics.push({
+    //     //                     name: metric_measurements[0].measurements[0][3].job_name,
+    //     //                     job_id: metric_measurements[0].dimensions.job_id,
+    //     //                     user_id: metric_measurements[0].dimensions.user_id,
+    //     //                     metrics: {
+    //     //                         state: this._JOB_STATE[metric_measurements[0].measurements[0][1]],
+    //     //                         //TODO elapsed_time:
+    //     //                         //TODO start_time
+    //     //                         //TODO end_time
+    //     //                         resources: [{name: "nodes", value: hosts }]
+    //     //                     }
+    //     //                 })
+    //     //             }
+    //     //         })
+    //     //     });
+    // }
 
     private _delete(path, params) {
         return this._request("DELETE", path, params, undefined);
