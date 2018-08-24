@@ -1,7 +1,7 @@
 {
   "name": "slurm-visualisation-app",
   "version": "1.0.0",
-  "description": "A app plugin for grafana to visualisation slurm metrics and easily analyse metrics related to jobs",
+  "description": "A app plugin for grafana to visualisation slurm metrics and easily analyse metrics related to jobss",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

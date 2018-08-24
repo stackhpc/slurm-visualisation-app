@@ -1,6 +1,5 @@
 import coreModule from "app/core/core_module"
 import SlurmAppConfigCtrl from "./components/config/config"
-import SlurmOverviewPageCtrl from "./components/pages/slurm_overview"
 import MonascaClient from "./components/monasca_client"
 import { loadPluginCss } from "app/plugins/sdk";
 
@@ -12,6 +11,5 @@ loadPluginCss({
 });
 
 export {
-    SlurmAppConfigCtrl as ConfigCtrl,
-    SlurmOverviewPageCtrl
+    SlurmAppConfigCtrl as ConfigCtrl
 }
