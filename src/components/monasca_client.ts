@@ -117,7 +117,7 @@ export default class MonascaClient {
         }
 
         return this.backendSrv
-            .get("api/plugins/monasca-app/settings")
+            .get("api/plugins/stackhpc-slurm-visualisation-app/settings")
             .then(response => {
                 if (!response.jsonData || !response.jsonData.datasourceName) {
                     throw new Error("No datasource selected in app configuration");

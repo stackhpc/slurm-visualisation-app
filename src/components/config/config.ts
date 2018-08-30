@@ -32,23 +32,23 @@ export default class SlurmAppConfigCtrl {
             this.appModel.jsonData = {};
         }
         this.appEditCtrl.setPostUpdateHook(this.postUpdate.bind(this));
-        // this.init = this.loadDataSources()
-        //     .then(() => this.$timeout());
+        this.init = this.loadDataSources()
+             .then(() => this.$timeout());
     }
 
-    // private loadDataSources(){
-    //     return this.backendSrv.get("/api/datasources")
-    //     .then(response => {
-    //         this.datasources =  response
-    //         .filter(ds => SlurmAppConfigCtrl.acceptedTypes.indexOf(ds.type) >= 0)
-    //         .map(ds => ds.name);
-            
-    //         //Select first datasource if none previously selected
-    //         if(!this.appModel.jsonData.dataSourceName && this.datasources.length > 0){
-    //             this.appModel.jsonData.dataSourceName = this.datasources[0];
-    //         }
-    //     });
-    // }
+    private loadDataSources(){
+        return this.backendSrv.get("/api/datasources")
+        .then(response => {
+            this.datasources =  response
+            .filter(ds => SlurmAppConfigCtrl.acceptedTypes.indexOf(ds.type) >= 0)
+            .map(ds => ds.name);
+         
+            //Select first datasource if none previously selected
+            if(!this.appModel.jsonData.dataSourceName && this.datasources.length > 0){
+                this.appModel.jsonData.dataSourceName = this.datasources[0];
+            }
+        });
+    }
 
     private postUpdate() {
         if (!this.appModel.enabled) {

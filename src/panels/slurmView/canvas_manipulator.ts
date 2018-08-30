@@ -15,14 +15,15 @@ export default class CanvasManipulator {
     private job_id_saturation_value_map: Map<number, number> = new Map();
     private jobs_data: Array<any>;
     private mouse_down = false;
-    private mouse_move = false;
     private mouse_down_offset_x;
     private display_job_overview_overlay: bluebird<any>;
     private canvas_image: ImageData;
+    private click_count = 0;
+    private singleClickTimer: any;
 
     constructor(private canvas: HTMLCanvasElement, private job_overview_overlay: HTMLDivElement,
         private node_height, private level_offset, private total_width, private $location, 
-        private monascaSrv: MonascaClient){
+        private $window, private monascaSrv: MonascaClient, private $timeout){
 
         this.node_height = node_height * window.devicePixelRatio;
         this.level_offset = level_offset * window.devicePixelRatio;
@@ -41,6 +42,17 @@ export default class CanvasManipulator {
                 + this.jobs_data[this.jobs_data.length-1].levels * this.level_offset
                 + this.node_height
             : 0;
+    }
+
+    private redirectToJobStatistics(job_id){
+
+        console.log("double click");
+        this.$timeout(() => {
+            this.$location.path("/dashboard/db/job-statistics").search({
+                "var-job_id": job_id,
+                "var-datasource": "Monasca API"
+            })
+        }, 200);
     }
 
     private getJobWidth(job){
@@ -68,6 +80,7 @@ export default class CanvasManipulator {
                 return [node_i, selected_job];
             }
         }
+        return [null, null]
     }
 
     private mouse_down_start_offsetX;
@@ -88,18 +101,22 @@ export default class CanvasManipulator {
             this.mouse_down_offset_x = event.offsetX * window.devicePixelRatio;
         });
 
+        this.canvas.addEventListener("mouseup", (event) => {
+            this.mouse_down = false;
+        });
+
         this.canvas.addEventListener("mousemove", (event) => {
             var offsetX = event.offsetX * window.devicePixelRatio;
             var offsetY = event.offsetY * window.devicePixelRatio;
             if(this.mouse_down == true){
-                if(!this.mouse_move){
-                    this.drawLine(
-                        [this.mouse_down_start_offsetX, 0],
-                        [this.mouse_down_start_offsetX, this.getHeight()],
-                        "red"
-                    );
-                    this.mouse_move = true;
-                }
+//                if(!this.mouse_move){
+//                    this.drawLine(
+//                        [this.mouse_down_start_offsetX, 0],
+//                        [this.mouse_down_start_offsetX, this.getHeight()],
+//                        "red"
+//                    );
+//                    this.mouse_move = true;
+//                }
                 if(Math.abs(offsetX - this.mouse_down_start_offsetX) < this.mouse_down_delta_offset_x){
                     //refresh and draw overlay till current point
                     this.drawingContext.putImageData(this.canvas_image, 0, 0);
@@ -136,59 +153,74 @@ export default class CanvasManipulator {
                 }
             }
         });
-        this.canvas.addEventListener("mouseup", (event) => {
-            if(this.mouse_down && !this.mouse_move){
-                var offsetX = event.offsetX * window.devicePixelRatio;
-                var offsetY = event.offsetY * window.devicePixelRatio;
-                var [node_i, selected_job] = this.findNode(offsetX, offsetY);
-                if(selected_job != null){
 
-                    this.job_overview_overlay.style.display = "block";
-                    this.job_overview_overlay.style.top = event.offsetY + "px";
-                    this.job_overview_overlay.style.left = event.offsetX + "px";
-                    this.job_overview_overlay.style.backgroundColor = "transparent";
-                    this.job_overview_overlay.style.color = "white";
-                    this.job_overview_overlay.innerHTML = `
-                            <span ng-class="icon" class="fa fa-spinner fa-spin"></span>
-                        `;
-
-                    var metric_prefix = `user.stats.${selected_job.job_id}.${selected_job.owner}`
-
-                    if(this.display_job_overview_overlay != null) this.display_job_overview_overlay.cancel();
-                    this.display_job_overview_overlay = bluebird.resolve(this.monascaSrv.listMetricNamesStartWith(metric_prefix))
-                        .then(data => {
-                            data = ['user.stats.0.doug.user_metric1', 'user.stats.0.doug.user_metric2'];
-                            var user_metrics: Array<any> = data.map(metric => metric.slice(metric_prefix.length + 1))
-                            this.job_overview_overlay.style.backgroundColor = "#141414";
-                            this.job_overview_overlay.innerHTML = 
-                                "<div style='margin: 10px 20px 10px 10px'>" +
-                                []
-                                .concat(user_metrics
-                                    .reduce((acc, val) => {
-                                        acc.push(`<div style="text-indent: 20px;"> ${val} </div>`);
-                                        return acc;
-                                    }, [`<div> User Metrics </div>`]))
-                                .concat([`job id: ${selected_job.job_id}`, `owner: ${selected_job.owner}`]
-                                    .reduce((acc, val) => {
-                                        acc.push(`<div style="text-indent: 20px;"> ${val} </div>`);
-                                        return acc;
-                                    }, [`<div> Job Info </div>`])
-                                )
-                                .join("\n")
-                                + "</div>"
-                        });
-                    // this.$location.path("/dashboard/db/system-overview").search({
-                    //     "var-hostname": hostname,
-                    //     "from": !isNaN(start_time.getTime()) ? start_time.getTime() : undefined,
-                    //     "to": !isNaN(end_time.getTime()) ? end_time.getTime() : undefined,
-                    // })
-
-
-                }
+        this.canvas.addEventListener("click", (event) => {
+            this.click_count++;
+            if (this.click_count === 1) {
+                this.singleClickTimer = setTimeout(() => {
+                    this.click_count = 0;
+                    onclick(event);
+                }, 400);
             }
-            this.mouse_move = false;
-            this.mouse_down = false;
+            else if (this.click_count === 2) {
+                clearTimeout(this.singleClickTimer);
+                this.click_count= 0;
+                ondblclick(event);
+            }
         })
+
+        var onclick = (event) => {
+            console.log("click");
+            var offsetX = event.offsetX * window.devicePixelRatio;
+            var offsetY = event.offsetY * window.devicePixelRatio;
+            var [node_i, selected_job] = this.findNode(offsetX, offsetY);
+            if(selected_job != null){
+
+                this.job_overview_overlay.style.display = "block";
+                this.job_overview_overlay.style.top = event.offsetY + "px";
+                this.job_overview_overlay.style.left = event.offsetX + "px";
+                this.job_overview_overlay.style.backgroundColor = "transparent";
+                this.job_overview_overlay.style.color = "white";
+                this.job_overview_overlay.innerHTML = `
+                        <span ng-class="icon" class="fa fa-spinner fa-spin"></span>
+                    `;
+
+                var metric_prefix = `user.stats.${selected_job.job_id}.${selected_job.owner}`
+
+                if(this.display_job_overview_overlay != null) this.display_job_overview_overlay.cancel();
+                this.display_job_overview_overlay = bluebird.resolve(this.monascaSrv.listMetricNamesStartWith(metric_prefix))
+                    .then(data => {
+                        data = ['user.stats.0.doug.user_metric1', 'user.stats.0.doug.user_metric2'];
+                        var user_metrics: Array<any> = data.map(metric => metric.slice(metric_prefix.length + 1))
+                        this.job_overview_overlay.style.backgroundColor = "#141414";
+                        this.job_overview_overlay.innerHTML = 
+                            "<div style='margin: 10px 20px 10px 10px'>" +
+                            []
+                            .concat(user_metrics
+                                .reduce((acc, val) => {
+                                    acc.push(`<div style="text-indent: 20px;"> ${val} </div>`);
+                                    return acc;
+                                }, [`<div> User Metrics </div>`]))
+                            .concat([`job id: ${selected_job.job_id}`, `owner: ${selected_job.owner}`]
+                                .reduce((acc, val) => {
+                                    acc.push(`<div style="text-indent: 20px;"> ${val} </div>`);
+                                    return acc;
+                                }, [`<div> Job Info </div>`])
+                            )
+                            .join("\n")
+                            + "</div>"
+                    });
+            }
+        }
+
+        var ondblclick = (event) => {
+            var offsetX = event.offsetX * window.devicePixelRatio;
+            var offsetY = event.offsetY * window.devicePixelRatio;
+            var [node_i, selected_job] = this.findNode(offsetX, offsetY);
+            if(selected_job != null){
+                this.redirectToJobStatistics(selected_job.job_id)
+            }
+        }
     }
 
     

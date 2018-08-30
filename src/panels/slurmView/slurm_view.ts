@@ -10,6 +10,7 @@ import { parseTimeSeries, inverseLinearInterpolateOSIString, linearInterpolateOS
 
 export default class SlurmViewCtrl extends MetricsPanelCtrl {
     public static templateUrl = "panels/slurmView/slurm_view.html"
+    private loaded = false;
     private node_height = 40 
     private node_level_offset = 10;
     private node_filters: any;
@@ -19,7 +20,8 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private jobs_by_level_by_node: Array<any>;
     private canvas_manipulator: CanvasManipulator;
 
-   constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location, public timeSrv){
+   constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location, 
+        protected $window, public $timeout, public timeSrv){
         super($scope, $injector);
 
         this.events.on('data-received', this.onDataReceived.bind(this));
@@ -113,7 +115,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
               "dimensions": [
                 {
                   "key": "hostname",
-                  "value": "$all"
+                  "value": "$hostname"
                 },
                 {
                   "key": "job_id",
@@ -134,7 +136,9 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private onDataReceived(dataSeries){
         console.log("data recieved: " + JSON.stringify(dataSeries));
 
-        if(dataSeries === undefined){
+        if(dataSeries == null && this.loaded != true) return;
+        if(dataSeries == null && this.loaded == true){
+            this.loaded = true;
             this.drawGraphic();
         }
         else {
@@ -279,7 +283,9 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         var canvas_elem = elem.find("#node-job-metrics-canvas")[0];
         var job_overview_overlay_elem = elem.find("#job-overview-overlay")[0];
         console.log("x: " + canvas_elem.parentElement.style.width);
-        this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height, this.node_level_offset, this.panel.span * 110 - 155, this.$location, this.monascaSrv);
+        this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height,
+        this.node_level_offset, this.panel.span * 110 - 155, this.$location, this.$window, this.monascaSrv,
+        this.$timeout);
         canvas_elem.addEventListener("mousedown", (event) => {
             if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== "") return;
             this.node_filters.newFrom = linearInterpolateOSIString(this.node_filters.from, this.node_filters.to, event.offsetX / (canvas_elem.width/2))
@@ -300,6 +306,5 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         });
         // this.initPanelData();
     }
-    
 }
 

@@ -16,5 +16,16 @@
 
 <h3 class="page-heading">Slurm Visualisation App Config</h3>
 <div class="pluginconfig-message" ng-if="ctrl.appModel.enabled">
-  Dashboards imported.
+    Dashboards imported.
+    <div class="gf-form">
+        <span class="gf-form-label">Datasource</span>
+        <div class="gf-form-select-wrapper">
+            <select
+            class="gf-form-input"
+            ng-model="ctrl.appModel.jsonData.datasourceName"
+            ng-options="ds for ds in ctrl.datasources"
+            required>
+            </select>
+        </div>
+    </div>
 </div>
