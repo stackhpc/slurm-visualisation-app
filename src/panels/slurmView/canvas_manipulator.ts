@@ -258,10 +258,13 @@ export default class CanvasManipulator {
             Array.from(Array(this.time_range_resolution).keys()).forEach(i => {
                 if(i == 0 || i == this.time_range_resolution) return;
                 var x = interval_x * i;
-                var time_string_24hr = moment(from).add(interval_ms * i).toDate().toUTCString().split(" ")[4];
+                var date = moment(from).add(interval_ms * i).toDate();
+                var time_str_24hr = date.toUTCString().split(" ")[4];
+                var date_str = date.getUTCDate() + "/" + date.getUTCMonth();
+                var time_date_str = date_str + " " + time_str_24hr;
                 this.drawingContext.font = "22px AvenirNext-UltraLight";
-                var textMeasure = this.drawingContext.measureText(time_string_24hr);
-                this.drawingContext.fillText(time_string_24hr, x - textMeasure.width/2, height + this.timeline_height * (3/4));
+                var textMeasure = this.drawingContext.measureText(time_date_str);
+                this.drawingContext.fillText(time_date_str, x - textMeasure.width/2, height + this.timeline_height * (3/4));
                 
                 this.drawLine(
                     [x, 0],

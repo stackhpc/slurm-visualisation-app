@@ -175,7 +175,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
     }
 
     public redirecttoJobNodeStatistics(hostname, job_and_metrics): void {
-        this.timeout(() => {
+        this.$timeout(() => {
             var start_time = new Date(job_and_metrics.job_data.start_time);
             var end_time = new Date(job_and_metrics.job_data.end_time);
             this.$location.path("/dashboard/db/system-overview").search({
