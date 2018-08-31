@@ -190,11 +190,11 @@ export default class CanvasManipulator {
                 if(this.display_job_overview_overlay != null) this.display_job_overview_overlay.cancel();
                 this.display_job_overview_overlay = bluebird.resolve(this.monascaSrv.listMetricNamesStartWith(metric_prefix))
                     .then(data => {
-                        data = ['user.stats.0.doug.user_metric1', 'user.stats.0.doug.user_metric2'];
+                        // data = ['user.stats.0.doug.user_metric1', 'user.stats.0.doug.user_metric2'];
                         var user_metrics: Array<any> = data.map(metric => metric.slice(metric_prefix.length + 1))
                         this.job_overview_overlay.style.backgroundColor = "#141414";
                         this.job_overview_overlay.innerHTML = 
-                            "<div style='margin: 10px 20px 10px 10px'>" +
+                            "<div style='margin: 10px 20px 10px 10px; white-space: nowrap;'>" +
                             []
                             .concat(user_metrics
                                 .reduce((acc, val) => {
