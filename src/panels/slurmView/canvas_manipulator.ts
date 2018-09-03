@@ -31,6 +31,7 @@ export default class CanvasManipulator {
         this.jobs_data = [];
         
         this.drawingContext = this.canvas.getContext('2d');
+        this.drawingContext.scale(window.devicePixelRatio, window.devicePixelRatio);
         this.canvas.style.width = (this.total_width/window.devicePixelRatio) + "px";
         this.canvas.width = this.total_width;
         this.addEventListeners();
@@ -262,7 +263,7 @@ export default class CanvasManipulator {
                 var time_str_24hr = date.toUTCString().split(" ")[4];
                 var date_str = date.getUTCDate() + "/" + date.getUTCMonth();
                 var time_date_str = date_str + " " + time_str_24hr;
-                this.drawingContext.font = "22px AvenirNext-UltraLight";
+                this.drawingContext.font = (11 * window.devicePixelRatio) + "px" + " AvenirNext-UltraLight";
                 var textMeasure = this.drawingContext.measureText(time_date_str);
                 this.drawingContext.fillText(time_date_str, x - textMeasure.width/2, height + this.timeline_height * (3/4));
                 
@@ -304,7 +305,7 @@ export default class CanvasManipulator {
         this.drawingContext.strokeRect(x, y, width, height);
         
         this.drawingContext.fillStyle = "white";
-        this.drawingContext.font = "22px AvenirNext-UltraLight";
+        this.drawingContext.font = (11 * window.devicePixelRatio) + "px" + " AvenirNext-UltraLight";
         this.drawingContext.fillText(job_id, x + width/2, y + height/2) 
     }
 
