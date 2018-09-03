@@ -138,10 +138,10 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
 
         if(dataSeries == null && this.loaded != true) return;
         if(dataSeries == null && this.loaded == true){
-            this.loaded = true;
             this.drawGraphic();
         }
         else {
+            this.loaded = true;
             // Check data
             try {
                 if(dataSeries[0]){
@@ -242,6 +242,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private drawGraphic(){
         
         //this.clampTimeRange();
+        console.log("drawGraphic");
         var [from, to] = [this.node_filters.from, this.node_filters.to]
         this.canvas_manipulator.clearJobs();
         for(let j = 0; j < this.filtered_nodes.length; j++){

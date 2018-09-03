@@ -122,12 +122,14 @@
     <table class="grafana-options-table">
         <tr>
             <th> Name </th>
+            <th> Job Id </th>
             <th> Resources </th>
             <th> Elapsed Time </th>
             <th> State </th>
         </tr>
         <tr ng-repeat="job_and_metrics in ctrl.filtered_jobs_and_metrics"> 
             <td> {{ job_and_metrics.job_data.name }} </td>
+            <td> {{ job_and_metrics.job_id }} </td>
             <td> 
                 <div ng-repeat="resource in job_and_metrics.job_data.resources" style="padding: 5px">
                     <span ng-if="ctrl.isArray(resource.value)"> 

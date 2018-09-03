@@ -17,14 +17,15 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
     constructor(public $scope, public $injector, public $timeout, private $location, private $window, private monascaSrv){
         super($scope, $injector);
 
-        // this.events.on('data-received', this.onDataReceived.bind(this));
-        // this.events.on('render', this.onDataReceived.bind(this));
+        this.events.on('data-received', this.onDataReceived.bind(this));
+        this.events.on('render', this.onDataReceived.bind(this));
         this.pageLoaded = false;
         this.loadFailed = false;
         this.job_filters = {
             start_time: {},
             end_time: {}
         };
+        this.configureMetricsOptionsTab();
     }
 
     private configureMetricsOptionsTab(){
@@ -69,7 +70,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
               "dimensions": [
                 {
                   "key": "hostname",
-                  "value": "$all"
+                  "value": "$hostname"
                 },
                 {
                   "key": "job_id",
@@ -170,7 +171,8 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
         if(dataSeries == null) return;
         else {
             this.jobs_and_metrics = parseTimeSeries(dataSeries);
-            this.filtered_jobs_and_metrics = this.jobs_and_metrics;
+            //this.filtered_jobs_and_metrics = this.jobs_and_metrics;
+            this.filterJobs();
         }
     }
 
@@ -263,7 +265,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
     }
 
     private link(scope, elem, attrs, ctrl){
-        this.initPanelData();
+        // this.initPanelData();
     }
 
     public suggestNodesByHostname(){
