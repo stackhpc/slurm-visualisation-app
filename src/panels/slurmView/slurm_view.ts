@@ -166,7 +166,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                 .map(jobs_by_level_for_node => {
                     return {
                         hostname: jobs_by_level_for_node.hostname,
-                        height: this.node_height + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
+                        height: this.node_height - 3.25 + (jobs_by_level_for_node.jobs_by_level.length - 1) * this.node_level_offset
                     }
             })
             this.filtered_nodes = this.nodes;
