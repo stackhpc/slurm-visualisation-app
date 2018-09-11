@@ -24,6 +24,7 @@ export function parseTimeSeries(dataSeries){
     })
 
     var job_metrics_groupedby_node = _.groupBy(dataSeries, job_metric => job_metric.target.split(" ")[0]); //group by host/node
+    delete job_metrics_groupedby_node["null"];
     var jobs_by_node = Object.entries(job_metrics_groupedby_node).map(([hostname, job_metrics_by_node]: [string, any]) => {
         var jobs = [];
         job_metrics_by_node.forEach(job_metric => {
