@@ -20,8 +20,6 @@ export function parseTimeSeries(dataSeries){
     var jobsById = _.groupBy(dataSeries, metric_measurements => metric_measurements.target.split(" ")[1]) //Group metrics by job id
     return Object.entries(jobsById).map(([job_id, metric_measurements]: [string, Array<any>]) => {
         var host_list = metric_measurements.map(metric_measurement => metric_measurement.target.split(" ")[0])
-        console.log("host_list", JSON.stringify(host_list));
-        console.log("metric_measurements", JSON.stringify(metric_measurements));
         if(!_.isEqual(host_list, ["null"])) {
             _.remove(host_list, host => host == "null")
             _.remove(metric_measurements, metric_measurement => metric_measurement.target.split(" ")[0] == "null")
