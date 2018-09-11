@@ -45,13 +45,15 @@ export default class CanvasManipulator {
             : 0;
     }
 
-    private redirectToJobStatistics(job_id){
+    private redirectToJobStatistics(job_id, start, end){
 
         console.log("double click");
         this.$timeout(() => {
             this.$location.path("/dashboard/db/job-statistics").search({
                 "var-job_id": job_id,
-                "var-datasource": "Monasca API"
+                "var-datasource": "Monasca API",
+                "from": start,
+                "to": end,
             })
         }, 200);
     }
@@ -219,7 +221,7 @@ export default class CanvasManipulator {
             var offsetY = event.offsetY * window.devicePixelRatio;
             var [node_i, selected_job] = this.findNode(offsetX, offsetY);
             if(selected_job != null){
-                this.redirectToJobStatistics(selected_job.job_id)
+                this.redirectToJobStatistics(selected_job.job_id, selected_job.start, selected_job.end);
             }
         }
     }
@@ -347,7 +349,7 @@ export default class CanvasManipulator {
 
         this.jobs_data[node_i].jobs_level_data[level].push({
             start_normalized: start_normalized, width_normalized: width_normalized, level: level,
-            job_id: job.job_id, hostname: job.hostname, owner: job.owner,
+            job_id: job.job_id, hostname: job.hostname, owner: job.owner, start: job.start, end: job.end,
             color: "#" + Number(rgb.r << 16 | rgb.g << 8 | rgb.b).toString(16).padStart(6, '0')
         });
     }
