@@ -82,7 +82,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
                 }
               ],
               "error": "",
-              "metric": "slurm.job_status",
+              "metric": "slurm.job_status.1",
               "alias": "@hostname @job_id @user_id"
             }
           ]
