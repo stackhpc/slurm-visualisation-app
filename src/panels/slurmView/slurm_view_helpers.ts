@@ -17,6 +17,12 @@ export function getTimeRange(dataSeries) : [number, number]{
 var job_state_map = ["UNKNOWN", "PENDING", "RUNNING", "SUSPENDED", "COMPLETING", "COMPLETED"]
 export function parseTimeSeries(dataSeries){
 
+    // Choose the longest and remove duplicates
+    var uniq_job_metrics = _.groupBy(dataSeries, job_metric => job_metric.target);
+    dataSeries = Object.entries(uniq_job_metrics).map(([hostname, uniq_job_metric_list]: [string, any]) => {
+        return _.maxBy(uniq_job_metric_list, job_metric => job_metric.datapoints.length);
+    })
+
     var job_metrics_groupedby_node = _.groupBy(dataSeries, job_metric => job_metric.target.split(" ")[0]); //group by host/node
     var jobs_by_node = Object.entries(job_metrics_groupedby_node).map(([hostname, job_metrics_by_node]: [string, any]) => {
         var jobs = [];
