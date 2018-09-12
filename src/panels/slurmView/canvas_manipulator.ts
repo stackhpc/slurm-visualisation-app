@@ -112,14 +112,6 @@ export default class CanvasManipulator {
             var offsetX = event.offsetX * window.devicePixelRatio;
             var offsetY = event.offsetY * window.devicePixelRatio;
             if(this.mouse_down == true){
-//                if(!this.mouse_move){
-//                    this.drawLine(
-//                        [this.mouse_down_start_offsetX, 0],
-//                        [this.mouse_down_start_offsetX, this.getHeight()],
-//                        "red"
-//                    );
-//                    this.mouse_move = true;
-//                }
                 if(Math.abs(offsetX - this.mouse_down_start_offsetX) < this.mouse_down_delta_offset_x){
                     //refresh and draw overlay till current point
                     this.drawingContext.putImageData(this.canvas_image, 0, 0);

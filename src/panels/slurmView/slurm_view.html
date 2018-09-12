@@ -1,6 +1,6 @@
 
 
-<div>
+<div id="slurm-panel-content" style="overflow: auto;">
 
         <div class="node-filters" style="overflow: auto;">
             <div class="gf-form-inline" style="float: left; margin-bottom: 10px; margin-left: 15px;">
@@ -53,8 +53,8 @@
 
         <div class="node-labels" style="clear: left; float: left; overflow: auto;">
             <div ng-repeat="node in ctrl.filtered_nodes">
-                <div class="gf-form-inline">
-                    <div class="gf-form">
+                <div class="gf-form-inline node-label">
+                    <div class="gf-form" style="font-size: 16px;">
                         <label 
                             type="text"
                             class="gf-form-input"

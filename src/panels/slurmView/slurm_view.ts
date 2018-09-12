@@ -19,6 +19,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private jobs_by_node: Array<any>;
     private jobs_by_level_by_node: Array<any>;
     private canvas_manipulator: CanvasManipulator;
+    private panel_container_computed_style_object: any;
 
    constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location, 
         protected $window, public $timeout, public timeSrv){
@@ -211,37 +212,12 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         this.refresh();
     }
 
-    // private clampTimeRange(){
-
-    //     if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== ""){
-    //         //Clamp timerange to period of time job was active
-    //         var [minFrom, maxTo] = [null, null]
-    //         this.filtered_nodes.forEach(node => {
-    //             var jobs_for_node = this.jobs_by_node
-    //                 .find(jobs_for_node => jobs_for_node.hostname === node.hostname);
-    //             jobs_for_node.jobs
-    //                 .filter(job =>  job.job_id === this.node_filters.job_filters.job_id)
-    //                 .forEach(job => {
-    //                     minFrom = Math.min(minFrom != null ? minFrom : Number.MAX_VALUE, job.start);
-    //                     maxTo = Math.max(maxTo != null ? maxTo : Number.MIN_VALUE, job.end);
-    //                 })
-    //         });
-    //         if(minFrom != null && maxTo != null){
-                
-    //             this.timeSrv.setTime({
-    //                 from: minFrom,
-    //                 to: maxTo
-    //             })
-    //         }
-    //     }
-    //     else {
-
-    //     }
-    // }
+    private maxWidthNodeLabel(){
+        return _.max(this.filtered_nodes.map(node => node.hostname.length)) * 8 + 60;
+    }
 
     private drawGraphic(){
         
-        //this.clampTimeRange();
         console.log("drawGraphic");
         var [from, to] = [this.node_filters.from, this.node_filters.to]
         this.canvas_manipulator.clearJobs();
@@ -267,13 +243,12 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                             startProp = startProp == null ? 0 : startProp;
                             endProp = endProp == null ? 1 : endProp;
                         } else return;
-                    // if((endProp - startProp) * this.total_width < 30) return;
                     this.canvas_manipulator.addJob(j, level, job, startProp, endProp - startProp);
                 })
             })
         }
-        console.log("this.panel.span: " + this.panel.span);
-        this.canvas_manipulator.resetCanvas(this.panel.span * 110 - 155);
+        console.log("maxwidthNodeLabel: " + this.maxWidthNodeLabel());
+        this.canvas_manipulator.resetCanvas(parseFloat(this.panel_container_computed_style_object.width.match("^([.\\d]+)px$")[1]) - this.maxWidthNodeLabel());
         this.canvas_manipulator.drawTimeline(from, to);
         this.canvas_manipulator.drawJobs(undefined);
     }
@@ -283,9 +258,9 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         //Create and Configure Canvas
         var canvas_elem = elem.find("#node-job-metrics-canvas")[0];
         var job_overview_overlay_elem = elem.find("#job-overview-overlay")[0];
-        console.log("x: " + canvas_elem.parentElement.style.width);
+        this.panel_container_computed_style_object = this.$window.getComputedStyle(elem.find("#slurm-panel-content")[0]); 
         this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height,
-        this.node_level_offset, this.panel.span * 110 - 155, this.$location, this.$window, this.monascaSrv,
+        this.node_level_offset, 0, this.$location, this.$window, this.monascaSrv,
         this.$timeout);
         canvas_elem.addEventListener("mousedown", (event) => {
             if(this.node_filters.job_filters.job_id != null && this.node_filters.job_filters.job_id !== "") return;
@@ -298,7 +273,6 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
             if(!moment(this.node_filters.newTo).isSame(moment(this.node_filters.newFrom), "minute")){
                 var to = moment(this.node_filters.newTo).isAfter(moment(this.node_filters.newFrom)) ? this.node_filters.newTo : this.node_filters.newFrom;
                 var from = moment(this.node_filters.newFrom).isBefore(moment(this.node_filters.newTo)) ? this.node_filters.newFrom : this.node_filters.newTo;
-                //this.eventManager.updateTime({to: to, from: from});
                 this.timeSrv.setTime({
                     from: from,
                     to: to
