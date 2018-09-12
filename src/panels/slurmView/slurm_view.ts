@@ -11,6 +11,7 @@ import { parseTimeSeries, inverseLinearInterpolateOSIString, linearInterpolateOS
 export default class SlurmViewCtrl extends MetricsPanelCtrl {
     public static templateUrl = "panels/slurmView/slurm_view.html"
     private loaded = false;
+    private timeline_height = 30 * window.devicePixelRatio;
     private node_height = 40 
     private node_level_offset = 10;
     private node_filters: any;
