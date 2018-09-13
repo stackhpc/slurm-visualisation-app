@@ -54,8 +54,9 @@ export default class CanvasManipulator {
                 "var-datasource": "Monasca API",
                 "from": start,
                 "to": end,
-            })
-        }, 200);
+            });
+	    this.$window.location.reload();
+        }, 100);
     }
 
     private getJobWidth(job){

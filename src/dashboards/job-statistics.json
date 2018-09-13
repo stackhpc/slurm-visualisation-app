@@ -142,7 +142,7 @@
                 }
               ],
               "error": "",
-              "metric": "slurm.ave_cpu",
+              "metric": "slurm.ave_cpu_mins",
               "period": "300",
               "refId": "A"
             }
@@ -150,7 +150,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average CPU (Mins)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -229,7 +229,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average Disk Read (MB)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -313,7 +313,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average Disk Write (MB)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -396,7 +396,7 @@
                 }
               ],
               "error": "",
-              "metric": "slurm.ave_pages",
+              "metric": "slurm.ave_pages_kb",
               "period": "300",
               "refId": "A"
             }
@@ -404,7 +404,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average Pages (KB)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -475,7 +475,7 @@
                 }
               ],
               "error": "",
-              "metric": "slurm.ave_cpu_freq_ghz",
+              "metric": "slurm.ave_cpu_freq_khz",
               "period": "300",
               "refId": "A"
             }
@@ -483,7 +483,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average CPU frequency (KHZ)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -566,7 +566,7 @@
                 }
               ],
               "error": "",
-              "metric": "slurm.ave_rss_mb",
+              "metric": "slurm.ave_rss_kb",
               "period": "300",
               "refId": "A"
             }
@@ -574,7 +574,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average RSS (KB)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
@@ -645,7 +645,7 @@
                 }
               ],
               "error": "",
-              "metric": "slurm.ave_vm_size_mb",
+              "metric": "slurm.ave_vm_size_kb",
               "period": "300",
               "refId": "A"
             }
@@ -653,7 +653,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Panel Title",
+          "title": "Average VM size (KB)",
           "tooltip": {
             "msResolution": false,
             "shared": true,
