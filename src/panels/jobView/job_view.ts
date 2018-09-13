@@ -3,7 +3,7 @@
 import {MetricsPanelCtrl} from 'app/plugins/sdk';
 import _ from 'lodash';
 import moment from '../../libs/moment'
-import { parseTimeSeries } from './job_view_helpers'; 
+import { parseTimeSeries } from './job_view_helpers';
 
 export default class JobViewCtrl extends MetricsPanelCtrl {
 
@@ -70,7 +70,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
               "dimensions": [
                 {
                   "key": "hostname",
-                  "value": "$hostname"
+                  "value": "$all"
                 },
                 {
                   "key": "job_id",
@@ -82,7 +82,7 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
                 }
               ],
               "error": "",
-              "metric": "slurm.job_status.1",
+              "metric": "slurm.job_status",
               "alias": "@hostname @job_id @user_id"
             }
           ]
@@ -94,21 +94,21 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
         var from = moment().subtract(1, "day").toDate().getTime();
         var interval = moment.duration(moment(to).diff(moment(from)));
         var times = Array.from(Array(5).keys()).map(i => moment(from).add(interval * (i/4)).toDate().getTime());
-    
+
         var _JOB_STATE = {
-            "UNKNOWN": 0,  
+            "UNKNOWN": 0,
             "PENDING": 1,       // PD, Awaiting resource allocation
             "RUNNING": 2,       // R, Resources allocated and script executing
             "SUSPENDED": 3,     // S, Job suspended and previously allocated resources released
             "COMPLETING": 4,    // CG, in the process of completing, processes of a job still executing in the background
             "COMPLETED": 5      // CD, job terminated (successfully)
         }
-        
+
         var dataSeries = [
             {
                 target: "gluster-2.alaskalocal 3 john",
                 datapoints: [
-                    [_JOB_STATE["RUNNING"], times[1], 
+                    [_JOB_STATE["RUNNING"], times[1],
                     {"job_name":"test_mpivch.sh", 'runtime': '00:00:00', 'time_limit': '1-00:00:00',
                     'start_time': '2018-01-26T12:05:46', 'end_time': '2018-01-27T12:05:46'}],
                     [_JOB_STATE["COMPLETED"], times[3],
@@ -161,12 +161,12 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
               ]
             }
         ]
-    
+
         this.onDataReceived(dataSeries);
     }
 
     private onDataReceived(dataSeries){
-        
+
         console.log("dataSeries: " + JSON.stringify(dataSeries));
         if(dataSeries == null) return;
         else {
@@ -188,8 +188,20 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
         }, 250);
     }
 
+    public redirectToJobStatistics(job_and_metrics): void {
+	this.$timeout(() => {
+            var start_time = new Date(job_and_metrics.job_data.start_time);
+            var end_time = new Date(job_and_metrics.job_data.end_time);
+            this.$location.path("/dashboard/db/job-statistics").search({
+                "var-job_id": job_and_metrics.job_id,
+                "from": !isNaN(start_time.getTime()) ? start_time.getTime() : undefined,
+                "to": !isNaN(end_time.getTime()) ? end_time.getTime() : undefined,
+            });
+	}, 250);
+    }
+
     public filterJobs(): void {
-        
+
         this.filtered_jobs_and_metrics = _.cloneDeep(this.jobs_and_metrics);
         //Filter by Job State
         if(this.job_filters.hostname != null && this.job_filters.hostname !== ""){
@@ -218,14 +230,14 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
             if(this.job_filters.start_time.time != null && !isNaN(this.job_filters.start_time.time.getTime())){
                 if(filter == "AFTER"){
                     this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
-                        var startDate = new Date(job_and_metrics.job_data.start_time) 
+                        var startDate = new Date(job_and_metrics.job_data.start_time);
                         return !isNaN(startDate.getTime()) && moment(startDate)
                             .isAfter(moment(this.job_filters.start_time.time))
                     })
                 }
                 if(filter === "BEFORE"){
                     this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
-                        var startDate = new Date(job_and_metrics.job_data.start_time) 
+                        var startDate = new Date(job_and_metrics.job_data.start_time);
                         return !isNaN(startDate.getTime()) && moment(startDate)
                             .isBefore(moment(this.job_filters.start_time.time))
                     })
@@ -238,14 +250,14 @@ export default class JobViewCtrl extends MetricsPanelCtrl {
             if(this.job_filters.end_time.time != null && !isNaN(this.job_filters.end_time.time.getTime())){
                 if(filter == "AFTER"){
                     this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
-                        var endDate = new Date(job_and_metrics.job_data.end_time) 
+                        var endDate = new Date(job_and_metrics.job_data.end_time)
                         return !isNaN(endDate.getTime()) && moment(endDate)
                             .isAfter(moment(this.job_filters.end_time.time))
                     })
                 }
                 if(filter === "BEFORE"){
                     this.filtered_jobs_and_metrics = this.filtered_jobs_and_metrics.filter(job_and_metrics => {
-                        var endDate = new Date(job_and_metrics.job_data.end_time) 
+                        var endDate = new Date(job_and_metrics.job_data.end_time)
                         return !isNaN(endDate.getTime()) && moment(endDate)
                             .isBefore(moment(this.job_filters.end_time.time))
                     })

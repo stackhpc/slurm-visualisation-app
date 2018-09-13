@@ -128,7 +128,7 @@
             <th> State </th>
         </tr>
         <tr ng-repeat="job_and_metrics in ctrl.filtered_jobs_and_metrics"> 
-            <td> {{ job_and_metrics.job_data.name }} </td>
+            <td ng-click="ctrl.redirectToJobStatistics(job_and_metrics)"> {{ job_and_metrics.job_data.name }} </td>
             <td> {{ job_and_metrics.job_id }} </td>
             <td> 
                 <div ng-repeat="resource in job_and_metrics.job_data.resources" style="padding: 5px">

@@ -55,7 +55,6 @@ export default class CanvasManipulator {
                 "from": start,
                 "to": end,
             });
-	    this.$window.location.reload();
         }, 100);
     }
 

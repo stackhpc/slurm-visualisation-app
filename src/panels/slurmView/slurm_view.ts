@@ -12,7 +12,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     public static templateUrl = "panels/slurmView/slurm_view.html"
     private loaded = false;
     private timeline_height = 30 * window.devicePixelRatio;
-    private node_height = 40 
+    private node_height = 40
     private node_level_offset = 10;
     private node_filters: any;
     private nodes: Array<any>;
@@ -22,7 +22,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     private canvas_manipulator: CanvasManipulator;
     private panel_container_computed_style_object: any;
 
-   constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location, 
+   constructor(public $scope, public $injector, protected monascaSrv, protected alertSrv, protected $location,
         protected $window, public $timeout, public timeSrv){
         super($scope, $injector);
 
@@ -40,12 +40,12 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         var from = moment().subtract(1, "day").toDate().getTime();
         var interval = moment.duration(moment(to).diff(moment(from)));
         var times = Array.from(Array(5).keys()).map(i => moment(from).add(interval * (i/4)).toDate().getTime());
-    
+
         var dataSeries = [
             {
               target: "gluster-1.alaskalocal 0 doug",
               datapoints: [
-                [2, times[2]], 
+                [2, times[2]],
                 [2, times[3]],
               ]
             },
@@ -71,7 +71,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
               ]
             }
         ]
-    
+
         this.onDataReceived(dataSeries);
     }
 
@@ -117,7 +117,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
               "dimensions": [
                 {
                   "key": "hostname",
-                  "value": "$hostname"
+                  "value": "$all"
                 },
                 {
                   "key": "job_id",
@@ -129,7 +129,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                 }
               ],
               "error": "",
-              "metric": "slurm.job_status.1",
+              "metric": "slurm.job_status",
               "alias": "@hostname @job_id @user_id"
             }
           ]
@@ -154,7 +154,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                 return;
             }
 
-            
+
             // Store data
             [this.node_filters.from, this.node_filters.to] = getTimeRange(dataSeries);
             this.jobs_by_node = parseTimeSeries(dataSeries);
@@ -176,18 +176,18 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
             // Draw data
             this.drawGraphic();
         }
-        
+
     }
 
     public filterNodes(){
 
-        
+
         var hostname_dimension = this.panel.targets[0].dimensions
             .find(dimension => dimension.key === "hostname")
         if(hostname_dimension != null) {
             if(this.node_filters.hostname != null && this.node_filters.hostname !== ""){
                 hostname_dimension.value = this.node_filters.hostname;
-            } else hostname_dimension.value = "$hostname";
+            } else hostname_dimension.value = "$all"
         }
 
         var user_id_dimension = this.panel.targets[0].dimensions
@@ -218,7 +218,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
     }
 
     private drawGraphic(){
-        
+
         console.log("drawGraphic");
         var [from, to] = [this.node_filters.from, this.node_filters.to]
         this.canvas_manipulator.clearJobs();
@@ -236,10 +236,10 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                     jobs_by_level = jobs_by_level.filter(job => job.owner === this.node_filters.job_filters.owner);
                 }
                 jobs_by_level.forEach(job => {
-                    
+
                     var startProp = inverseLinearInterpolateOSIString(from, to, job.start);
                     var endProp = inverseLinearInterpolateOSIString(from, to, job.end);
-                    if((startProp != null && endProp != null) || (job.start > from && job.end > to) 
+                    if((startProp != null && endProp != null) || (job.start > from && job.end > to)
                         || (job.start < from && job.end > to) || (job.start < from && job.end < to)) {
                             startProp = startProp == null ? 0 : startProp;
                             endProp = endProp == null ? 1 : endProp;
@@ -259,7 +259,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
         //Create and Configure Canvas
         var canvas_elem = elem.find("#node-job-metrics-canvas")[0];
         var job_overview_overlay_elem = elem.find("#job-overview-overlay")[0];
-        this.panel_container_computed_style_object = this.$window.getComputedStyle(elem.find("#slurm-panel-content")[0]); 
+        this.panel_container_computed_style_object = this.$window.getComputedStyle(elem.find("#slurm-panel-content")[0]);
         this.canvas_manipulator = new CanvasManipulator(canvas_elem, job_overview_overlay_elem, this.node_height,
         this.node_level_offset, 0, this.$location, this.$window, this.monascaSrv,
         this.$timeout);
@@ -278,7 +278,7 @@ export default class SlurmViewCtrl extends MetricsPanelCtrl {
                     from: from,
                     to: to
                 })
-            }        
+            }
         });
         // this.initPanelData();
     }
